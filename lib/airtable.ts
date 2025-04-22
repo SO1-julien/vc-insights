@@ -26,7 +26,7 @@ export type Startup = {
 // Fallback mock data in case Airtable API is not available
 const mockStartups: Startup[] = [
   {
-    id: "1",
+    id: "mock-1",
     name: "TechInnovate",
     country: "USA",
     category: "SaaS",
@@ -36,7 +36,7 @@ const mockStartups: Startup[] = [
     fundraising: 5000000,
     yearFounded: 2019,
     employees: 45,
-    analysisRating: 8,
+    analysisRating: 4,
     analysisContent: "Strong growth trajectory with innovative product.",
     fundingStage: "Series A",
     productionDevelopmentStage: "Growth",
@@ -48,7 +48,7 @@ const mockStartups: Startup[] = [
     url: "https://techinnovate.example.com",
   },
   {
-    id: "2",
+    id: "mock-2",
     name: "GreenEnergy",
     country: "Germany",
     category: "CleanTech",
@@ -70,7 +70,7 @@ const mockStartups: Startup[] = [
     url: "https://greenenergy.example.com",
   },
   {
-    id: "3",
+    id: "mock-3",
     name: "HealthTech",
     country: "UK",
     category: "HealthTech",

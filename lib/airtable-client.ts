@@ -6,21 +6,47 @@ const airtableApiKey = process.env.AIRTABLE_API_KEY
 const airtableBaseId = process.env.AIRTABLE_BASE_ID
 const startupTableName = process.env.AIRTABLE_TABLE_NAME || "Startups"
 
-// Create and configure Airtable instance
+// Debug function to help identify environment variable issues
+export function debugAirtableConfig() {
+  console.log("Airtable Environment Variables:")
+  console.log(`AIRTABLE_API_KEY exists: ${Boolean(process.env.AIRTABLE_API_KEY)}`)
+  console.log(`AIRTABLE_BASE_ID exists: ${Boolean(process.env.AIRTABLE_BASE_ID)}`)
+  console.log(`AIRTABLE_TABLE_NAME: ${process.env.AIRTABLE_TABLE_NAME || "Not set (using default 'Startups')"}`)
+
+  // Check if we're in a server component or API route
+  console.log(`Running in: ${typeof window === "undefined" ? "Server" : "Client"} context`)
+
+  // Check Node.js environment
+  console.log(`NODE_ENV: ${process.env.NODE_ENV}`)
+}
+
+// Create and configure Airtable instance with better error handling
 const configureAirtable = () => {
+  // Debug environment variables in development
+  if (process.env.NODE_ENV !== "production") {
+    debugAirtableConfig()
+  }
+
   if (!airtableApiKey) {
-    throw new Error("AIRTABLE_API_KEY is not defined")
+    console.warn("AIRTABLE_API_KEY is not defined - using mock data")
+    return null
   }
 
   if (!airtableBaseId) {
-    throw new Error("AIRTABLE_BASE_ID is not defined")
+    console.warn("AIRTABLE_BASE_ID is not defined - using mock data")
+    return null
   }
 
-  Airtable.configure({
-    apiKey: airtableApiKey,
-  })
+  try {
+    Airtable.configure({
+      apiKey: airtableApiKey,
+    })
 
-  return Airtable.base(airtableBaseId)
+    return Airtable.base(airtableBaseId)
+  } catch (error) {
+    console.error("Error configuring Airtable:", error)
+    return null
+  }
 }
 
 // Map Airtable record to Startup type
@@ -51,12 +77,7 @@ export const mapAirtableRecordToStartup = (record: any): Startup => {
 
 // Get Airtable instance (with error handling)
 export const getAirtableBase = () => {
-  try {
-    return configureAirtable()
-  } catch (error) {
-    console.error("Error configuring Airtable:", error)
-    return null
-  }
+  return configureAirtable()
 }
 
 // Get Airtable table

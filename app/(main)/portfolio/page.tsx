@@ -6,6 +6,7 @@ import { StartupCard } from "@/components/ui/startup-card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
 import { X, Filter } from "lucide-react"
+import { toast } from "@/components/ui/use-toast"
 
 export default function PortfolioPage() {
   const [startups, setStartups] = useState<Startup[]>([])
@@ -25,11 +26,28 @@ export default function PortfolioPage() {
   useEffect(() => {
     const loadStartups = async () => {
       try {
+        setLoading(true)
         const data = await fetchStartups()
+
+        // Check if we got mock data
+        if (data.length > 0 && data[0].id.startsWith("mock-")) {
+          console.warn("Using mock data - Airtable connection not available")
+        }
+
         setStartups(data)
         setFilteredStartups(data)
       } catch (error) {
         console.error("Error loading startups:", error)
+        // Show a more user-friendly message
+        toast({
+          title: "Error loading startups",
+          description: "Using sample data instead. Please check your Airtable configuration.",
+          variant: "destructive",
+        })
+
+        // Use empty array as fallback
+        setStartups([])
+        setFilteredStartups([])
       } finally {
         setLoading(false)
       }
