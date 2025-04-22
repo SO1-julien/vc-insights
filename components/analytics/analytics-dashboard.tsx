@@ -21,6 +21,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { DatePickerWithRange } from "@/components/ui/date-range-picker"
 import { addDays } from "date-fns"
 import type { DateRange } from "react-day-picker"
+import { Filter, X } from "lucide-react"
+import { Button } from "@/components/ui/button"
 
 export default function AnalyticsDashboard() {
   const [analytics, setAnalytics] = useState<any>(null)
@@ -29,13 +31,29 @@ export default function AnalyticsDashboard() {
     from: addDays(new Date(), -30),
     to: new Date(),
   })
+  const [isDefaultDateRange, setIsDefaultDateRange] = useState(true)
+
+  // Safe date range setter that ensures both from and to are set
+  const handleDateRangeChange = (newRange: DateRange | undefined) => {
+    // Only update if we have a complete range with both from and to
+    if (newRange && newRange.from && newRange.to) {
+      setDateRange(newRange)
+    }
+    // We don't update for incomplete ranges (only from set, no to)
+  }
 
   useEffect(() => {
     const loadAnalytics = async () => {
       setLoading(true)
       try {
-        const data = await fetchStartupsAnalytics()
-        setAnalytics(data)
+        // Only fetch if we have a complete date range
+        if (dateRange.from && dateRange.to) {
+          const data = await fetchStartupsAnalytics({
+            start: dateRange.from,
+            end: dateRange.to,
+          })
+          setAnalytics(data)
+        }
       } catch (error) {
         console.error("Error loading analytics:", error)
       } finally {
@@ -44,7 +62,22 @@ export default function AnalyticsDashboard() {
     }
 
     loadAnalytics()
+
+    // Check if date range is default
+    const defaultFrom = addDays(new Date(), -30).setHours(0, 0, 0, 0)
+    const defaultTo = new Date().setHours(0, 0, 0, 0)
+    const currentFrom = dateRange.from?.setHours(0, 0, 0, 0)
+    const currentTo = dateRange.to?.setHours(0, 0, 0, 0)
+
+    setIsDefaultDateRange(currentFrom === defaultFrom && currentTo === defaultTo)
   }, [dateRange])
+
+  const resetDateRange = () => {
+    setDateRange({
+      from: addDays(new Date(), -30),
+      to: new Date(),
+    })
+  }
 
   // Prepare data for charts
   const fundingStageData = analytics
@@ -66,14 +99,29 @@ export default function AnalyticsDashboard() {
       </div>
 
       {/* Date Range Filter */}
-      <Card className="mb-8">
-        <CardHeader>
-          <CardTitle>Filter by Date Range</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <DatePickerWithRange date={dateRange} setDate={setDateRange} />
-        </CardContent>
-      </Card>
+      <div className="mb-8">
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-2">
+            <Filter size={16} className="text-muted-foreground" />
+            <span className="text-sm font-medium">Date Range:</span>
+          </div>
+
+          <DatePickerWithRange date={dateRange} setDate={handleDateRangeChange} />
+
+          {!isDefaultDateRange && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={resetDateRange}
+              className="h-9 w-9 rounded-full"
+              title="Reset date range"
+            >
+              <X size={16} />
+              <span className="sr-only">Reset date range</span>
+            </Button>
+          )}
+        </div>
+      </div>
 
       {loading ? (
         <div className="flex h-64 items-center justify-center">

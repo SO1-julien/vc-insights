@@ -5,6 +5,7 @@ import { fetchStartups, type Startup } from "@/lib/airtable"
 import { StartupCard } from "@/components/ui/startup-card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
+import { X, Filter } from "lucide-react"
 
 export default function PortfolioPage() {
   const [startups, setStartups] = useState<Startup[]>([])
@@ -67,6 +68,8 @@ export default function PortfolioPage() {
     })
   }
 
+  const hasActiveFilters = filters.category || filters.country || filters.year
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
@@ -75,62 +78,67 @@ export default function PortfolioPage() {
       </div>
 
       {/* Filters */}
-      <div className="mb-8 rounded-lg border bg-card p-4 shadow-sm">
-        <h2 className="mb-4 text-lg font-medium">Filters</h2>
-        <div className="grid gap-4 md:grid-cols-4">
-          <div>
-            <Select value={filters.category} onValueChange={(value) => handleFilterChange("category", value)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Category" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Categories</SelectItem>
-                {categories.map((category) => (
-                  <SelectItem key={category} value={category}>
-                    {category}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+      <div className="mb-8">
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-2">
+            <Filter size={16} className="text-muted-foreground" />
+            <span className="text-sm font-medium">Filters:</span>
           </div>
 
-          <div>
-            <Select value={filters.country} onValueChange={(value) => handleFilterChange("country", value)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Country" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Countries</SelectItem>
-                {countries.map((country) => (
-                  <SelectItem key={country} value={country}>
-                    {country}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          <Select value={filters.category} onValueChange={(value) => handleFilterChange("category", value)}>
+            <SelectTrigger className="h-9 w-[180px]">
+              <SelectValue placeholder="Category" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Categories</SelectItem>
+              {categories.map((category) => (
+                <SelectItem key={category} value={category}>
+                  {category}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
-          <div>
-            <Select value={filters.year} onValueChange={(value) => handleFilterChange("year", value)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Year Founded" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Years</SelectItem>
-                {years.map((year) => (
-                  <SelectItem key={year} value={year.toString()}>
-                    {year}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          <Select value={filters.country} onValueChange={(value) => handleFilterChange("country", value)}>
+            <SelectTrigger className="h-9 w-[180px]">
+              <SelectValue placeholder="Country" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Countries</SelectItem>
+              {countries.map((country) => (
+                <SelectItem key={country} value={country}>
+                  {country}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
-          <div>
-            <Button variant="outline" onClick={resetFilters}>
-              Reset Filters
+          <Select value={filters.year} onValueChange={(value) => handleFilterChange("year", value)}>
+            <SelectTrigger className="h-9 w-[180px]">
+              <SelectValue placeholder="Year Founded" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Years</SelectItem>
+              {years.map((year) => (
+                <SelectItem key={year} value={year.toString()}>
+                  {year}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          {hasActiveFilters && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={resetFilters}
+              className="h-9 w-9 rounded-full"
+              title="Reset filters"
+            >
+              <X size={16} />
+              <span className="sr-only">Reset filters</span>
             </Button>
-          </div>
+          )}
         </div>
       </div>
 

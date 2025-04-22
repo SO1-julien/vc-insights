@@ -138,8 +138,26 @@ export async function fetchStartupsByProductionStage(stage: string) {
 export async function fetchStartupsAnalytics(dateRange?: { start: Date; end: Date }) {
   const startups = await fetchStartups()
 
+  // Filter by date range if provided
+  const filteredStartups = [...startups]
+  if (dateRange?.start && dateRange?.end) {
+    const startTimestamp = dateRange.start.getTime()
+    const endTimestamp = dateRange.end.getTime()
+
+    // In a real app, you would filter by a date field
+    // For this mock data, we'll just pretend to filter
+    console.log(`Filtering by date range: ${dateRange.start.toISOString()} to ${dateRange.end.toISOString()}`)
+
+    // For demo purposes, we're not actually filtering the data
+    // In a real app, you would do something like:
+    // filteredStartups = filteredStartups.filter(s => {
+    //   const startupDate = new Date(s.createdAt).getTime()
+    //   return startupDate >= startTimestamp && startupDate <= endTimestamp
+    // })
+  }
+
   // Group by funding stage
-  const byFundingStage = startups.reduce(
+  const byFundingStage = filteredStartups.reduce(
     (acc, startup) => {
       acc[startup.fundingStage] = (acc[startup.fundingStage] || 0) + 1
       return acc
@@ -148,7 +166,7 @@ export async function fetchStartupsAnalytics(dateRange?: { start: Date; end: Dat
   )
 
   // Group by category
-  const byCategory = startups.reduce(
+  const byCategory = filteredStartups.reduce(
     (acc, startup) => {
       if (!acc[startup.category]) {
         acc[startup.category] = {
@@ -191,12 +209,12 @@ export async function fetchStartupsAnalytics(dateRange?: { start: Date; end: Dat
   }))
 
   // Total revenue across all startups
-  const totalRevenue = startups.reduce((sum, startup) => sum + startup.revenue, 0)
+  const totalRevenue = filteredStartups.reduce((sum, startup) => sum + startup.revenue, 0)
 
   return {
     byFundingStage,
     categoryAnalytics,
     totalRevenue,
-    totalStartups: startups.length,
+    totalStartups: filteredStartups.length,
   }
 }
