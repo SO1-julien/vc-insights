@@ -5,13 +5,15 @@ import { fetchStartups, type Startup } from "@/lib/airtable"
 import { StartupCard } from "@/components/ui/startup-card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
-import { X, Filter } from "lucide-react"
+import { X, Filter, AlertTriangle } from "lucide-react"
 import { toast } from "@/components/ui/use-toast"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
 export default function PortfolioPage() {
   const [startups, setStartups] = useState<Startup[]>([])
   const [filteredStartups, setFilteredStartups] = useState<Startup[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [filters, setFilters] = useState({
     category: "",
     country: "",
@@ -27,17 +29,26 @@ export default function PortfolioPage() {
     const loadStartups = async () => {
       try {
         setLoading(true)
+        setError(null)
+        console.log("Fetching startups data...")
         const data = await fetchStartups()
+        console.log(`Fetched ${data.length} startups`)
+
+        if (data.length > 0 && data[0].id.startsWith("mock-")) {
+          console.warn("Using mock data - Airtable connection not available")
+          setError("Using sample data. Airtable connection is not available.")
+        }
+
         setStartups(data)
         setFilteredStartups(data)
       } catch (error) {
+        console.error("Error loading startups:", error)
+        setError("Failed to load startup data. Using sample data instead.")
         toast({
           title: "Error loading startups",
-          description: "Failed to load startup data. Please try again later.",
+          description: "Using sample data instead. Please check your Airtable configuration.",
           variant: "destructive",
         })
-        setStartups([])
-        setFilteredStartups([])
       } finally {
         setLoading(false)
       }
@@ -84,6 +95,14 @@ export default function PortfolioPage() {
         <h1 className="mb-2 text-3xl font-bold">Startup Portfolio</h1>
         <p className="text-muted-foreground">Browse and analyze startups across different industries and regions</p>
       </div>
+
+      {error && (
+        <Alert variant="warning" className="mb-6">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertTitle>Warning</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
 
       {/* Filters */}
       <div className="mb-8">
