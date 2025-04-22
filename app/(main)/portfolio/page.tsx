@@ -40,15 +40,15 @@ export default function PortfolioPage() {
   useEffect(() => {
     let result = [...startups]
 
-    if (filters.category) {
+    if (filters.category && filters.category !== "all") {
       result = result.filter((s) => s.category === filters.category)
     }
 
-    if (filters.country) {
+    if (filters.country && filters.country !== "all") {
       result = result.filter((s) => s.country === filters.country)
     }
 
-    if (filters.year) {
+    if (filters.year && filters.year !== "all") {
       result = result.filter((s) => s.yearFounded === Number.parseInt(filters.year))
     }
 

@@ -76,7 +76,7 @@ export default function AdminDashboard() {
       result = result.filter((u) => u.email.toLowerCase().includes(filters.email.toLowerCase()))
     }
 
-    if (filters.role) {
+    if (filters.role && filters.role !== "all") {
       result = result.filter((u) => u.role === filters.role)
     }
 

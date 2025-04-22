@@ -4,7 +4,6 @@ import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { fetchStartupsAnalytics } from "@/lib/airtable"
 import { formatCurrency } from "@/lib/utils"
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import {
   BarChart,
   Bar,
@@ -21,11 +20,12 @@ import {
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { DatePickerWithRange } from "@/components/ui/date-range-picker"
 import { addDays } from "date-fns"
+import type { DateRange } from "react-day-picker"
 
-export default function AnalyticsPage() {
+export default function AnalyticsDashboard() {
   const [analytics, setAnalytics] = useState<any>(null)
   const [loading, setLoading] = useState(true)
-  const [dateRange, setDateRange] = useState({
+  const [dateRange, setDateRange] = useState<DateRange>({
     from: addDays(new Date(), -30),
     to: new Date(),
   })
@@ -89,14 +89,14 @@ export default function AnalyticsPage() {
             <Card>
               <CardHeader className="pb-2">
                 <CardDescription>Total Startups</CardDescription>
-                <CardTitle className="text-3xl">{analytics.totalStartups}</CardTitle>
+                <CardTitle className="text-3xl">{analytics?.totalStartups || 0}</CardTitle>
               </CardHeader>
             </Card>
 
             <Card>
               <CardHeader className="pb-2">
                 <CardDescription>Total Revenue</CardDescription>
-                <CardTitle className="text-3xl">{formatCurrency(analytics.totalRevenue)}</CardTitle>
+                <CardTitle className="text-3xl">{formatCurrency(analytics?.totalRevenue || 0)}</CardTitle>
               </CardHeader>
             </Card>
           </div>
@@ -108,7 +108,7 @@ export default function AnalyticsPage() {
                 <CardTitle>Startups by Funding Stage</CardTitle>
               </CardHeader>
               <CardContent>
-                <ChartContainer className="h-[300px]">
+                <div className="h-[300px] w-full">
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie
@@ -130,7 +130,7 @@ export default function AnalyticsPage() {
                       <Legend />
                     </PieChart>
                   </ResponsiveContainer>
-                </ChartContainer>
+                </div>
               </CardContent>
             </Card>
 
@@ -139,25 +139,18 @@ export default function AnalyticsPage() {
                 <CardTitle>Startups by Category</CardTitle>
               </CardHeader>
               <CardContent>
-                <ChartContainer
-                  config={{
-                    startups: {
-                      label: "Number of Startups",
-                      color: "hsl(var(--chart-1))",
-                    },
-                  }}
-                  className="h-[300px]"
-                >
+                <div className="h-[300px] w-full">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={categoryData}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="category" />
                       <YAxis />
-                      <ChartTooltip content={<ChartTooltipContent />} />
-                      <Bar dataKey="startups" fill="var(--color-startups)" name="Startups" />
+                      <Tooltip />
+                      <Legend />
+                      <Bar dataKey="startups" fill="#8884d8" name="Startups" />
                     </BarChart>
                   </ResponsiveContainer>
-                </ChartContainer>
+                </div>
               </CardContent>
             </Card>
           </div>

@@ -1,9 +1,4 @@
-import {
-  fetchStartupByName,
-  fetchStartupsByCategory,
-  fetchStartupsByFundingStage,
-  fetchStartupsByProductionStage,
-} from "@/lib/airtable"
+import { fetchStartupByName, fetchStartupsByCategory } from "@/lib/airtable"
 import { notFound } from "next/navigation"
 import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
@@ -11,8 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { formatCurrency } from "@/lib/utils"
 import Link from "next/link"
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from "recharts"
+import DynamicCharts from "@/components/startup/dynamic-charts"
 
 export default async function StartupPage({ params }: { params: { name: string } }) {
   const decodedName = decodeURIComponent(params.name)
@@ -24,8 +18,6 @@ export default async function StartupPage({ params }: { params: { name: string }
 
   // Fetch comparison data
   const sameCategory = await fetchStartupsByCategory(startup.category)
-  const sameFundingStage = await fetchStartupsByFundingStage(startup.fundingStage)
-  const sameProductionStage = await fetchStartupsByProductionStage(startup.productionDevelopmentStage)
 
   // Prepare comparison data for charts
   const revenueComparisonData = sameCategory
@@ -169,61 +161,11 @@ export default async function StartupPage({ params }: { params: { name: string }
 
       {/* Comparison Charts */}
       <div className="mb-8 grid gap-8 lg:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Revenue Comparison</CardTitle>
-            <CardDescription>Compared to other {startup.category} startups</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ChartContainer
-              config={{
-                revenue: {
-                  label: "Revenue",
-                  color: "hsl(var(--chart-1))",
-                },
-              }}
-              className="h-[300px]"
-            >
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={revenueComparisonData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                  <Bar dataKey="revenue" fill="var(--color-revenue)" name="Revenue" />
-                </BarChart>
-              </ResponsiveContainer>
-            </ChartContainer>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Employees Comparison</CardTitle>
-            <CardDescription>Compared to other {startup.category} startups</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ChartContainer
-              config={{
-                employees: {
-                  label: "Employees",
-                  color: "hsl(var(--chart-2))",
-                },
-              }}
-              className="h-[300px]"
-            >
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={employeesComparisonData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                  <Bar dataKey="employees" fill="var(--color-employees)" name="Employees" />
-                </BarChart>
-              </ResponsiveContainer>
-            </ChartContainer>
-          </CardContent>
-        </Card>
+        <DynamicCharts
+          revenueData={revenueComparisonData}
+          employeesData={employeesComparisonData}
+          category={startup.category}
+        />
       </div>
 
       {/* Analysis */}
