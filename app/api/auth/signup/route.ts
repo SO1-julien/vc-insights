@@ -1,6 +1,19 @@
-import { createServerClient } from "@/lib/supabase/server"
+import { createClient } from "@supabase/supabase-js"
 import { type NextRequest, NextResponse } from "next/server"
 import { hashPassword } from "@/lib/auth"
+import type { Database } from "@/lib/database.types"
+
+// Create a server-only Supabase client directly in the API route
+const getSupabase = () => {
+  const supabaseUrl = process.env.SUPABASE_URL
+  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+  if (!supabaseUrl || !supabaseKey) {
+    throw new Error("Missing Supabase environment variables")
+  }
+
+  return createClient<Database>(supabaseUrl, supabaseKey)
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -10,7 +23,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Email and password are required" }, { status: 400 })
     }
 
-    const supabase = createServerClient()
+    const supabase = getSupabase()
 
     // Check if user already exists
     const { data: existingUser } = await supabase.from("users").select("id").eq("email", email).single()

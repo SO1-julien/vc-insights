@@ -26,3 +26,7 @@ export const createServerClient = () => {
 
   return supabase
 }
+
+// This comment marks this file as server-only
+// @ts-expect-error - This is a server component
+export const serverOnly = true

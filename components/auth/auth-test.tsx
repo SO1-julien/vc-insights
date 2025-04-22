@@ -87,7 +87,9 @@ export function AuthTest() {
 
             {adminAccessResult && (
               <div
-                className={`rounded-md p-4 ${adminAccessResult.includes("Success") ? "bg-green-50 text-green-800" : "bg-red-50 text-red-800"}`}
+                className={`rounded-md p-4 ${
+                  adminAccessResult.includes("Success") ? "bg-green-50 text-green-800" : "bg-red-50 text-red-800"
+                }`}
               >
                 {adminAccessResult}
               </div>

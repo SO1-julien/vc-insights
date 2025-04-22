@@ -89,30 +89,20 @@ export default function AdminDashboard() {
     setCreating(true)
 
     try {
-      const supabase = createClientClient()
-
-      // First, check if user already exists
-      const { data: existingUser } = await supabase.from("users").select("id").eq("email", newUser.email).single()
-
-      if (existingUser) {
-        toast({
-          title: "Error",
-          description: "A user with this email already exists",
-          variant: "destructive",
-        })
-        return
-      }
-
-      // Create the user
-      const { error } = await supabase.from("users").insert([
-        {
-          email: newUser.email,
-          password: newUser.password, // Note: In a real app, this would be hashed
-          role: newUser.role,
+      // Use the API route instead of direct Supabase access
+      const response = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-      ])
+        body: JSON.stringify(newUser),
+      })
 
-      if (error) throw error
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to create user")
+      }
 
       toast({
         title: "Success",
@@ -130,7 +120,7 @@ export default function AdminDashboard() {
       console.error("Error creating user:", error)
       toast({
         title: "Error",
-        description: "Failed to create user",
+        description: error instanceof Error ? error.message : "Failed to create user",
         variant: "destructive",
       })
     } finally {
