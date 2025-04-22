@@ -4,9 +4,16 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
+import { signOut } from "@/lib/auth"
+import { useCurrentUser } from "@/lib/auth-client"
 
 export function Navbar() {
   const pathname = usePathname()
+  const { user, loading, isAdmin } = useCurrentUser()
+
+  const handleSignOut = async () => {
+    await signOut()
+  }
 
   return (
     <header className="sticky top-0 z-50 border-b bg-white">
@@ -44,19 +51,26 @@ export function Navbar() {
             Analytics
           </Link>
 
-          <Link
-            href="/admin"
-            className={`text-sm font-medium ${
-              pathname === "/admin" ? "text-primary" : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            Admin
-          </Link>
+          {isAdmin && (
+            <Link
+              href="/admin"
+              className={`text-sm font-medium ${
+                pathname === "/admin" ? "text-primary" : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Admin
+            </Link>
+          )}
         </nav>
 
-        <div>
-          <Button variant="outline" size="sm" asChild>
-            <Link href="/">Exit Platform</Link>
+        <div className="flex items-center gap-4">
+          {!loading && user && (
+            <span className="text-sm text-muted-foreground">
+              {user.email} ({user.role})
+            </span>
+          )}
+          <Button variant="outline" size="sm" onClick={handleSignOut}>
+            Sign Out
           </Button>
         </div>
       </div>

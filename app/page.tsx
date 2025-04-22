@@ -1,7 +1,6 @@
 import { Footer } from "@/components/layout/footer"
 import Image from "next/image"
-import { Button } from "@/components/ui/button"
-import Link from "next/link"
+import { SignInForm } from "@/components/auth/sign-in-form"
 
 export default function Home() {
   return (
@@ -106,21 +105,11 @@ export default function Home() {
             </div>
 
             <div className="z-10 w-full max-w-md rounded-lg bg-white p-8 shadow-lg">
-              <h2 className="mb-6 text-2xl font-bold">Welcome to InvestorInsight</h2>
+              <h2 className="mb-6 text-2xl font-bold">Sign In</h2>
               <p className="mb-6 text-muted-foreground">
                 Access comprehensive startup analysis and make data-driven investment decisions.
               </p>
-              <Button asChild className="w-full">
-                <Link href="/portfolio">Enter Platform</Link>
-              </Button>
-              <div className="mt-6 text-center text-sm">
-                <p>
-                  Need help?{" "}
-                  <Link href="#" className="text-primary hover:underline">
-                    Contact us
-                  </Link>
-                </p>
-              </div>
+              <SignInForm />
             </div>
           </div>
         </div>

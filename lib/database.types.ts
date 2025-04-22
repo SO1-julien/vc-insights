@@ -5,10 +5,10 @@ export interface Database {
     Tables: {
       users: {
         Row: {
-          id: string
+          id: string // UUID
           email: string
           password: string
-          role: "admin" | "user"
+          role: string // Changed from "admin" | "user" to string
           created_at: string
           updated_at: string
         }
@@ -16,7 +16,7 @@ export interface Database {
           id?: string
           email: string
           password: string
-          role?: "admin" | "user"
+          role?: string // Changed from "admin" | "user" to string
           created_at?: string
           updated_at?: string
         }
@@ -24,7 +24,7 @@ export interface Database {
           id?: string
           email?: string
           password?: string
-          role?: "admin" | "user"
+          role?: string // Changed from "admin" | "user" to string
           created_at?: string
           updated_at?: string
         }
