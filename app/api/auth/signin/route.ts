@@ -53,7 +53,8 @@ export async function POST(request: Request) {
     })
 
     // Set cookie
-    cookies().set({
+    const cookieStore = cookies()
+    cookieStore.set({
       name: "auth-token",
       value: token,
       httpOnly: true,

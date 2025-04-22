@@ -50,7 +50,6 @@ export function SignInForm() {
         })
       }
     } catch (error) {
-      console.error("Sign in error:", error)
       setError("An unexpected error occurred")
       toast({
         title: "Sign in failed",
@@ -99,12 +98,6 @@ export function SignInForm() {
       <Button type="submit" className="w-full" disabled={isLoading}>
         {isLoading ? "Signing in..." : "Sign In"}
       </Button>
-
-      <div className="text-center text-sm text-muted-foreground">
-        <p>Test Accounts:</p>
-        <p>Admin: admin@example.com / admin</p>
-        <p>User: user@example.com / user</p>
-      </div>
     </form>
   )
 }

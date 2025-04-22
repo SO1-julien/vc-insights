@@ -1,7 +1,7 @@
 import { createHash } from "crypto"
-import { jwtVerify, SignJWT } from "jose"
+import { createJWT, verifyJWT } from "./jwt"
 
-const JWT_SECRET = new TextEncoder().encode(process.env.SUPABASE_JWT_SECRET || "your-secret-key")
+const JWT_SECRET = process.env.SUPABASE_JWT_SECRET || "your-secret-key"
 
 /**
  * Hashes a password using SHA-256
@@ -47,7 +47,6 @@ export async function signIn(email: string, password: string) {
       role: data.role,
     }
   } catch (error) {
-    console.error("Sign in error:", error)
     return {
       success: false,
       error: "An unexpected error occurred",
@@ -78,21 +77,18 @@ export async function signOut() {
  * Server-side function to create a JWT token
  */
 export async function createToken(payload: any) {
-  return new SignJWT(payload)
-    .setProtectedHeader({ alg: "HS256" })
-    .setIssuedAt()
-    .setExpirationTime("24h")
-    .sign(JWT_SECRET)
+  return createJWT(
+    {
+      ...payload,
+      exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24, // 24 hours
+    },
+    JWT_SECRET,
+  )
 }
 
 /**
  * Server-side function to verify a JWT token
  */
 export async function verifyToken(token: string) {
-  try {
-    const { payload } = await jwtVerify(token, JWT_SECRET)
-    return { valid: true, payload }
-  } catch (error) {
-    return { valid: false, payload: null }
-  }
+  return verifyJWT(token, JWT_SECRET)
 }

@@ -52,24 +52,14 @@ export function Navbar() {
           </Link>
 
           {isAdmin && (
-            <>
-              <Link
-                href="/admin"
-                className={`text-sm font-medium ${
-                  pathname === "/admin" ? "text-primary" : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                Admin
-              </Link>
-              <Link
-                href="/debug"
-                className={`text-sm font-medium ${
-                  pathname === "/debug" ? "text-primary" : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                Debug
-              </Link>
-            </>
+            <Link
+              href="/admin"
+              className={`text-sm font-medium ${
+                pathname === "/admin" ? "text-primary" : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Admin
+            </Link>
           )}
         </nav>
 

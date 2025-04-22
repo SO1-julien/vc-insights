@@ -23,6 +23,7 @@ import { addDays } from "date-fns"
 import type { DateRange } from "react-day-picker"
 import { Filter, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { toast } from "@/components/ui/use-toast"
 
 export default function AnalyticsDashboard() {
   const [analytics, setAnalytics] = useState<any>(null)
@@ -55,7 +56,11 @@ export default function AnalyticsDashboard() {
           setAnalytics(data)
         }
       } catch (error) {
-        console.error("Error loading analytics:", error)
+        toast({
+          title: "Error loading analytics",
+          description: "Failed to load analytics data. Please try again later.",
+          variant: "destructive",
+        })
       } finally {
         setLoading(false)
       }

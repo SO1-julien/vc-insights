@@ -44,9 +44,6 @@ export default function AdminDashboard() {
     total: 0,
   })
 
-  // At the beginning of your AdminDashboard component
-  const [envError, setEnvError] = useState<string | null>(null)
-
   const fetchUsers = async () => {
     setLoading(true)
     try {
@@ -71,14 +68,7 @@ export default function AdminDashboard() {
   }
 
   useEffect(() => {
-    // Check if environment variables are available
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-      setEnvError(
-        "Supabase environment variables are missing. This feature is only available in the deployed environment.",
-      )
-    } else {
-      fetchUsers()
-    }
+    fetchUsers()
   }, [])
 
   useEffect(() => {
@@ -191,24 +181,6 @@ export default function AdminDashboard() {
   const startIndex = (pagination.page - 1) * pagination.pageSize
   const endIndex = startIndex + pagination.pageSize
   const paginatedUsers = filteredUsers.slice(startIndex, endIndex)
-
-  // Then in your render function, before the main content
-  if (envError) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="mb-2 text-3xl font-bold">User Management</h1>
-          <p className="text-muted-foreground">Create and manage user accounts</p>
-        </div>
-        <Alert variant="destructive">
-          <AlertDescription>{envError}</AlertDescription>
-        </Alert>
-        <p className="mt-4">
-          This feature requires Supabase environment variables and is only available in the deployed environment.
-        </p>
-      </div>
-    )
-  }
 
   return (
     <div className="container mx-auto px-4 py-8">

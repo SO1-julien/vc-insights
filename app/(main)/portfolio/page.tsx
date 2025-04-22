@@ -28,24 +28,14 @@ export default function PortfolioPage() {
       try {
         setLoading(true)
         const data = await fetchStartups()
-
-        // Check if we got mock data
-        if (data.length > 0 && data[0].id.startsWith("mock-")) {
-          console.warn("Using mock data - Airtable connection not available")
-        }
-
         setStartups(data)
         setFilteredStartups(data)
       } catch (error) {
-        console.error("Error loading startups:", error)
-        // Show a more user-friendly message
         toast({
           title: "Error loading startups",
-          description: "Using sample data instead. Please check your Airtable configuration.",
+          description: "Failed to load startup data. Please try again later.",
           variant: "destructive",
         })
-
-        // Use empty array as fallback
         setStartups([])
         setFilteredStartups([])
       } finally {
