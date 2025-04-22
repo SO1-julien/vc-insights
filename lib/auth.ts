@@ -2,10 +2,10 @@ import { createServerClient } from "./supabase/server"
 import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
 import bcrypt from "bcryptjs"
-import jwt from "jsonwebtoken"
+import { jwtVerify } from "jose"
 
 // JWT secret key - in production, use a proper environment variable
-const JWT_SECRET = process.env.SUPABASE_JWT_SECRET || "your-jwt-secret-key"
+const JWT_SECRET = new TextEncoder().encode(process.env.SUPABASE_JWT_SECRET || "your-jwt-secret-key")
 
 export async function hashPassword(password: string) {
   return bcrypt.hash(password, 10)
@@ -63,13 +63,13 @@ export async function getSession() {
   if (!token) return null
 
   try {
-    // Verify and decode the JWT token
-    const decoded = jwt.verify(token, JWT_SECRET)
+    // Verify and decode the JWT token using jose
+    const { payload } = await jwtVerify(token, JWT_SECRET)
     return {
       user: {
-        id: decoded.sub,
-        email: decoded.email,
-        role: decoded.role,
+        id: payload.sub,
+        email: payload.email as string,
+        role: payload.role as string,
       },
     }
   } catch (error) {

@@ -1,10 +1,10 @@
 import { createServerClient } from "@/lib/supabase/server"
 import { type NextRequest, NextResponse } from "next/server"
 import { comparePasswords } from "@/lib/auth"
-import jwt from "jsonwebtoken"
+import { SignJWT } from "jose"
 
 // JWT secret key - in production, use a proper environment variable
-const JWT_SECRET = process.env.SUPABASE_JWT_SECRET || "your-jwt-secret-key"
+const JWT_SECRET = new TextEncoder().encode(process.env.SUPABASE_JWT_SECRET || "your-jwt-secret-key")
 
 export async function POST(request: NextRequest) {
   try {
@@ -34,17 +34,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Invalid credentials" }, { status: 401 })
     }
 
-    // Create a custom JWT token
-    const token = jwt.sign(
-      {
-        sub: user.id,
-        email: user.email,
-        role: user.role,
-        iat: Math.floor(Date.now() / 1000),
-        exp: Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60, // 1 week
-      },
-      JWT_SECRET,
-    )
+    // Create a custom JWT token using jose
+    const token = await new SignJWT({
+      sub: user.id,
+      email: user.email,
+      role: user.role,
+    })
+      .setProtectedHeader({ alg: "HS256" })
+      .setIssuedAt()
+      .setExpirationTime("7d") // 1 week
+      .sign(JWT_SECRET)
 
     // Create the response
     const response = NextResponse.json({
