@@ -26,7 +26,17 @@ export async function POST(request: NextRequest) {
     const supabase = getSupabase()
 
     // Check if user already exists
-    const { data: existingUser } = await supabase.from("users").select("id").eq("email", email).single()
+    const { data: existingUser, error: checkError } = await supabase
+      .from("users")
+      .select("id")
+      .eq("email", email)
+      .single()
+
+    if (checkError && checkError.code !== "PGRST116") {
+      // PGRST116 is the error code for "no rows returned" which is expected
+      console.error("Error checking existing user:", checkError)
+      return NextResponse.json({ error: "Error checking if user exists" }, { status: 500 })
+    }
 
     if (existingUser) {
       return NextResponse.json({ error: "User with this email already exists" }, { status: 409 })
@@ -35,31 +45,38 @@ export async function POST(request: NextRequest) {
     // Hash password
     const hashedPassword = await hashPassword(password)
 
+    // Get current timestamp
+    const now = new Date().toISOString()
+
     // Create user in the database
-    const { data: newUser, error: dbError } = await supabase
+    const { data: newUser, error: insertError } = await supabase
       .from("users")
-      .insert([{ email, password: hashedPassword, role }])
+      .insert([
+        {
+          email,
+          password: hashedPassword,
+          role,
+          created_at: now,
+          updated_at: now,
+        },
+      ])
       .select()
       .single()
 
-    if (dbError) {
-      return NextResponse.json({ error: dbError.message }, { status: 500 })
+    if (insertError) {
+      console.error("Error creating user in database:", insertError)
+      return NextResponse.json({ error: insertError.message }, { status: 500 })
     }
 
-    // Create user in Supabase Auth
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-    })
-
-    if (error) {
-      // Rollback user creation in the database
-      await supabase.from("users").delete().eq("id", newUser.id)
-
-      return NextResponse.json({ error: error.message }, { status: 500 })
+    if (!newUser) {
+      return NextResponse.json({ error: "Failed to create user" }, { status: 500 })
     }
+
+    // Skip Supabase Auth integration for now as it's not necessary for our custom auth system
+    // We're using our own JWT-based authentication
 
     return NextResponse.json({
+      success: true,
       user: {
         id: newUser.id,
         email: newUser.email,

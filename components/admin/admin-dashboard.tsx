@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { createClientClient } from "@/lib/supabase/client"
 import { toast } from "@/components/ui/use-toast"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 
 interface User {
   id: string
@@ -24,6 +25,7 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true)
   const [creating, setCreating] = useState(false)
   const [deleting, setDeleting] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
   const [newUser, setNewUser] = useState({
     email: "",
@@ -41,6 +43,9 @@ export default function AdminDashboard() {
     pageSize: 10,
     total: 0,
   })
+
+  // At the beginning of your AdminDashboard component
+  const [envError, setEnvError] = useState<string | null>(null)
 
   const fetchUsers = async () => {
     setLoading(true)
@@ -66,7 +71,14 @@ export default function AdminDashboard() {
   }
 
   useEffect(() => {
-    fetchUsers()
+    // Check if environment variables are available
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+      setEnvError(
+        "Supabase environment variables are missing. This feature is only available in the deployed environment.",
+      )
+    } else {
+      fetchUsers()
+    }
   }, [])
 
   useEffect(() => {
@@ -87,8 +99,15 @@ export default function AdminDashboard() {
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault()
     setCreating(true)
+    setError(null)
 
     try {
+      // Validate inputs
+      if (!newUser.email || !newUser.password) {
+        setError("Email and password are required")
+        return
+      }
+
       // Use the API route instead of direct Supabase access
       const response = await fetch("/api/auth/signup", {
         method: "POST",
@@ -118,6 +137,7 @@ export default function AdminDashboard() {
       fetchUsers()
     } catch (error) {
       console.error("Error creating user:", error)
+      setError(error instanceof Error ? error.message : "Failed to create user")
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : "Failed to create user",
@@ -172,6 +192,24 @@ export default function AdminDashboard() {
   const endIndex = startIndex + pagination.pageSize
   const paginatedUsers = filteredUsers.slice(startIndex, endIndex)
 
+  // Then in your render function, before the main content
+  if (envError) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="mb-8">
+          <h1 className="mb-2 text-3xl font-bold">User Management</h1>
+          <p className="text-muted-foreground">Create and manage user accounts</p>
+        </div>
+        <Alert variant="destructive">
+          <AlertDescription>{envError}</AlertDescription>
+        </Alert>
+        <p className="mt-4">
+          This feature requires Supabase environment variables and is only available in the deployed environment.
+        </p>
+      </div>
+    )
+  }
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
@@ -182,6 +220,11 @@ export default function AdminDashboard() {
       {/* Create User Form */}
       <div className="mb-8 rounded-lg border bg-card p-6 shadow-sm">
         <h2 className="mb-4 text-xl font-medium">Create New User</h2>
+        {error && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
         <form onSubmit={handleCreateUser} className="space-y-4">
           <div className="grid gap-4 md:grid-cols-3">
             <div className="space-y-2">
@@ -191,7 +234,10 @@ export default function AdminDashboard() {
                 type="email"
                 placeholder="user@example.com"
                 value={newUser.email}
-                onChange={(e) => setNewUser((prev) => ({ ...prev, email: e.target.value }))}
+                onChange={(e) => {
+                  setNewUser((prev) => ({ ...prev, email: e.target.value }))
+                  setError(null)
+                }}
                 required
               />
             </div>
@@ -203,7 +249,10 @@ export default function AdminDashboard() {
                 type="password"
                 placeholder="••••••••"
                 value={newUser.password}
-                onChange={(e) => setNewUser((prev) => ({ ...prev, password: e.target.value }))}
+                onChange={(e) => {
+                  setNewUser((prev) => ({ ...prev, password: e.target.value }))
+                  setError(null)
+                }}
                 required
               />
             </div>
