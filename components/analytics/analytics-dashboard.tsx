@@ -53,9 +53,11 @@ export default function AnalyticsDashboard() {
             start: dateRange.from,
             end: dateRange.to,
           })
+
           setAnalytics(data)
         }
       } catch (error) {
+        console.error("Error loading analytics:", error)
         toast({
           title: "Error loading analytics",
           description: "Failed to load analytics data. Please try again later.",

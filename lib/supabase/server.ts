@@ -10,7 +10,7 @@ export const createServerClient = () => {
   const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
   if (!supabaseUrl || !supabaseKey) {
-    throw new Error("Missing Supabase environment variables")
+    throw new Error("Missing Supabase environment variables in server")
   }
 
   const supabase = createClient<Database>(supabaseUrl, supabaseKey, {

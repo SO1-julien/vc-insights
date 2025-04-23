@@ -72,9 +72,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Failed to create user" }, { status: 500 })
     }
 
-    // Skip Supabase Auth integration for now as it's not necessary for our custom auth system
-    // We're using our own JWT-based authentication
-
     return NextResponse.json({
       success: true,
       user: {

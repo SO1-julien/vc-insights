@@ -10,6 +10,7 @@ const getSupabase = () => {
   const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
   if (!supabaseUrl || !supabaseKey) {
+    console.error("Missing Supabase environment variables in signin route")
     throw new Error("Missing Supabase environment variables")
   }
 

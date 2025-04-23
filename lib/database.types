@@ -5,7 +5,7 @@ export interface Database {
     Tables: {
       users: {
         Row: {
-          id: string
+          id: string // UUID
           email: string
           password: string
           role: string
