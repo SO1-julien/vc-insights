@@ -17,7 +17,7 @@ export function StartupCard({ startup }: StartupCardProps) {
           <div className="flex items-start gap-4">
             <div className="relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-md">
               <Image
-                src={startup.logo || "/placeholder.svg"}
+                src={startup.logo || `/placeholder.svg?height=80&width=80`}
                 alt={`${startup.name} logo`}
                 fill
                 className="object-cover"

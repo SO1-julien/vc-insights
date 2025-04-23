@@ -36,3 +36,6 @@ export async function checkUserRole(requiredRole: string | string[]) {
 
   return user.role === requiredRole
 }
+
+// This marks the file as server-only
+export const dynamic = "force-dynamic"

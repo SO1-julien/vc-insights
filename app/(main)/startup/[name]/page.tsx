@@ -149,7 +149,7 @@ export default function StartupPage() {
           <div className="flex flex-col gap-6 md:flex-row">
             <div className="relative h-24 w-24 flex-shrink-0 overflow-hidden rounded-md">
               <Image
-                src={startup.logo || "/placeholder.svg"}
+                src={startup.logo || `/placeholder.svg?height=80&width=80`}
                 alt={`${startup.name} logo`}
                 fill
                 className="object-cover"
@@ -160,7 +160,7 @@ export default function StartupPage() {
               <div className="mb-2 flex items-center gap-2">
                 <h1 className="text-3xl font-bold">{startup.name}</h1>
                 <Button variant="outline" size="sm" asChild>
-                  <Link href={startup.url} target="_blank" rel="noopener noreferrer">
+                  <Link href={startup.url || "#"} target="_blank" rel="noopener noreferrer">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       width="16"

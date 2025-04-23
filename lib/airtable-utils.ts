@@ -106,15 +106,20 @@ export const getRelatedRecordNames = async (base: any, record: any, fieldName: s
 // Convert Airtable record to Startup type
 export const convertAirtableRecord = async (base: any, record: any): Promise<Startup> => {
   // Process all related records in parallel for better performance
-  const [country, category, industry, fundingStage, productionDevelopmentStage, targetMarket, customers] = await Promise.all([
-    getRelatedRecordName(base, record, "country"),
-    getRelatedRecordName(base, record, "category"),
-    getRelatedRecordName(base, record, "industry"),
-    getRelatedRecordName(base, record, "fundingStage"),
-    getRelatedRecordName(base, record, "productionDevelopmentStage"),
-    getRelatedRecordNames(base, record, "targetMarket"),
-    getRelatedRecordNames(base, record, "customers"),
-  ])
+  const [country, category, industry, fundingStage, productionDevelopmentStage, targetMarket, customers] =
+    await Promise.all([
+      getRelatedRecordName(base, record, "country"),
+      getRelatedRecordName(base, record, "category"),
+      getRelatedRecordName(base, record, "industry"),
+      getRelatedRecordName(base, record, "fundingStage"),
+      getRelatedRecordName(base, record, "productionDevelopmentStage"),
+      getRelatedRecordNames(base, record, "targetMarket"),
+      getRelatedRecordNames(base, record, "customers"),
+    ])
+
+  // Ensure logo and url are properly extracted
+  const logo = record.get("logo") || `/placeholder.svg?height=80&width=80`
+  const url = record.get("url") || "#"
 
   return {
     id: record.id,
@@ -135,8 +140,8 @@ export const convertAirtableRecord = async (base: any, record: any): Promise<Sta
     customers,
     ARR: Number(record.get("ARR")) || 0,
     grossMargin: Number(record.get("grossMargin")) || 0,
-    logo: record.get("logo") || "/placeholder.svg?height=80&width=80",
-    url: record.get("url") || "",
+    logo,
+    url,
   }
 }
 

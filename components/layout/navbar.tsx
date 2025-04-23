@@ -4,7 +4,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
-import { signOut } from "@/lib/auth"
+import { signOut } from "@/lib/auth-client-utils"
 import { useCurrentUser } from "@/lib/auth-client"
 
 export function Navbar() {
