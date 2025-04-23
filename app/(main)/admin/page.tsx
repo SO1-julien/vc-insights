@@ -1,5 +1,5 @@
 import AdminDashboard from "@/components/admin/admin-dashboard"
-import { AirtableDiagnostics } from "@/components/admin/airtable-diagnostics"
+import { SupabaseDiagnostics } from "@/components/admin/supabase-diagnostics"
 
 export default function AdminPage() {
   return (
@@ -10,7 +10,7 @@ export default function AdminPage() {
       </div>
 
       <div className="mb-8">
-        <AirtableDiagnostics />
+        <SupabaseDiagnostics />
       </div>
 
       <AdminDashboard />

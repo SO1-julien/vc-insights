@@ -1,4 +1,4 @@
-import { fetchStartupByName, fetchStartupsByCategory } from "@/lib/airtable"
+import { fetchStartupByName, fetchStartupsByCategory } from "@/lib/startups"
 import { notFound } from "next/navigation"
 import Image from "next/image"
 import { Badge } from "@/components/ui/badge"

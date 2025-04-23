@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { fetchStartups, type Startup } from "@/lib/airtable"
+import { fetchStartupsClient, type Startup } from "@/lib/startups"
 import { StartupCard } from "@/components/ui/startup-card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
@@ -31,12 +31,12 @@ export default function PortfolioPage() {
         setLoading(true)
         setError(null)
         console.log("Fetching startups data...")
-        const data = await fetchStartups()
+        const data = await fetchStartupsClient()
         console.log(`Fetched ${data.length} startups`)
 
         if (data.length > 0 && data[0].id.startsWith("mock-")) {
-          console.warn("Using mock data - Airtable connection not available")
-          setError("Using sample data. Airtable connection is not available.")
+          console.warn("Using mock data - Supabase connection not available")
+          setError("Using sample data. Supabase connection is not available.")
         }
 
         setStartups(data)
@@ -46,7 +46,7 @@ export default function PortfolioPage() {
         setError("Failed to load startup data. Using sample data instead.")
         toast({
           title: "Error loading startups",
-          description: "Using sample data instead. Please check your Airtable configuration.",
+          description: "Using sample data instead. Please check your Supabase configuration.",
           variant: "destructive",
         })
       } finally {

@@ -1,29 +1,10 @@
-import { getStartupsTable, mapAirtableRecordToStartup } from "./airtable-client"
+import { createServerClient } from "@/lib/supabase/server"
+import { createClientClient } from "@/lib/supabase/client"
+import type { Database } from "@/lib/database.types"
 
-export type Startup = {
-  id: string
-  name: string
-  country: string
-  category: string
-  industry: string[]
-  description: string
-  revenue: number
-  fundraising: number
-  yearFounded: number
-  employees: number
-  analysisRating: number
-  analysisContent: string
-  fundingStage: string
-  productionDevelopmentStage: string
-  targetMarket: string
-  customers: string
-  ARR: number
-  grossMargin: number
-  logo: string
-  url: string
-}
+export type Startup = Database["public"]["Tables"]["Startups"]["Row"]
 
-// Fallback mock data in case Airtable API is not available
+// Mock data for fallback
 const mockStartups: Startup[] = [
   {
     id: "mock-1",
@@ -93,127 +74,124 @@ const mockStartups: Startup[] = [
   },
 ]
 
+// Server-side function to fetch startups
 export async function fetchStartups(filters?: {
   category?: string
   country?: string
   year?: number
 }): Promise<Startup[]> {
   try {
-    let table
-    try {
-      table = getStartupsTable()
-    } catch (error) {
-      console.error("Failed to get Airtable table, using mock data:", error)
-      return applyFilters(mockStartups, filters)
-    }
+    const supabase = createServerClient()
 
-    // Build filter formula if filters are provided
-    let filterFormula = ""
+    let query = supabase.from("Startups").select("*")
 
+    // Apply filters if provided
     if (filters) {
-      const conditions = []
-
-      if (filters.category) {
-        conditions.push(`{category} = '${filters.category}'`)
+      if (filters.category && filters.category !== "all") {
+        query = query.eq("category", filters.category)
       }
 
-      if (filters.country) {
-        conditions.push(`{country} = '${filters.country}'`)
+      if (filters.country && filters.country !== "all") {
+        query = query.eq("country", filters.country)
       }
 
-      if (filters.year) {
-        conditions.push(`{yearFounded} = ${filters.year}`)
-      }
-
-      if (conditions.length > 0) {
-        filterFormula = `AND(${conditions.join(", ")})`
+      if (filters.year && filters.year !== 0) {
+        query = query.eq("yearFounded", filters.year)
       }
     }
 
-    // Fetch records from Airtable
-    const query: any = {}
-    if (filterFormula) {
-      query.filterByFormula = filterFormula
+    const { data, error } = await query
+
+    if (error) {
+      console.error("Error fetching startups:", error)
+      return mockStartups
     }
 
-    console.log("Fetching Airtable records with query:", query)
-    const records = await table.select(query).all()
-    console.log(`Successfully fetched ${records.length} records from Airtable`)
-
-    // Map Airtable records to Startup objects
-    return records.map(mapAirtableRecordToStartup)
+    return data || mockStartups
   } catch (error) {
-    console.error("Error fetching startups from Airtable:", error)
-    // Fallback to mock data if there's an error
-    return applyFilters(mockStartups, filters)
+    console.error("Error fetching startups:", error)
+    return mockStartups
+  }
+}
+
+// Client-side function to fetch startups
+export async function fetchStartupsClient(filters?: {
+  category?: string
+  country?: string
+  year?: number
+}): Promise<Startup[]> {
+  try {
+    const supabase = createClientClient()
+
+    let query = supabase.from("Startups").select("*")
+
+    // Apply filters if provided
+    if (filters) {
+      if (filters.category && filters.category !== "all") {
+        query = query.eq("category", filters.category)
+      }
+
+      if (filters.country && filters.country !== "all") {
+        query = query.eq("country", filters.country)
+      }
+
+      if (filters.year && filters.year !== 0) {
+        query = query.eq("yearFounded", filters.year)
+      }
+    }
+
+    const { data, error } = await query
+
+    if (error) {
+      console.error("Error fetching startups:", error)
+      return mockStartups
+    }
+
+    return data || mockStartups
+  } catch (error) {
+    console.error("Error fetching startups:", error)
+    return mockStartups
   }
 }
 
 export async function fetchStartupByName(name: string): Promise<Startup | null> {
   try {
-    let table
-    try {
-      table = getStartupsTable()
-    } catch (error) {
-      console.error("Failed to get Airtable table, using mock data:", error)
+    const supabase = createServerClient()
+
+    const { data, error } = await supabase.from("Startups").select("*").eq("name", name).single()
+
+    if (error) {
+      console.error("Error fetching startup by name:", error)
       return mockStartups.find((s) => s.name === name) || null
     }
 
-    // Fetch records from Airtable with name filter
-    console.log(`Fetching startup with name: ${name}`)
-    const records = await table
-      .select({
-        filterByFormula: `{name} = '${name}'`,
-      })
-      .all()
-
-    console.log(`Found ${records.length} records matching name: ${name}`)
-
-    if (records.length === 0) {
-      return null
-    }
-
-    // Map the first matching record to a Startup object
-    return mapAirtableRecordToStartup(records[0])
+    return data
   } catch (error) {
-    console.error("Error fetching startup by name from Airtable:", error)
-    // Fallback to mock data if there's an error
+    console.error("Error fetching startup by name:", error)
     return mockStartups.find((s) => s.name === name) || null
   }
 }
 
 export async function fetchStartupsByCategory(category: string): Promise<Startup[]> {
   try {
-    let table
-    try {
-      table = getStartupsTable()
-    } catch (error) {
-      console.error("Failed to get Airtable table, using mock data:", error)
+    const supabase = createServerClient()
+
+    const { data, error } = await supabase.from("Startups").select("*").eq("category", category)
+
+    if (error) {
+      console.error("Error fetching startups by category:", error)
       return mockStartups.filter((s) => s.category === category)
     }
 
-    // Fetch records from Airtable with category filter
-    console.log(`Fetching startups with category: ${category}`)
-    const records = await table
-      .select({
-        filterByFormula: `{category} = '${category}'`,
-      })
-      .all()
-
-    console.log(`Found ${records.length} records matching category: ${category}`)
-
-    // Map Airtable records to Startup objects
-    return records.map(mapAirtableRecordToStartup)
+    return data || mockStartups.filter((s) => s.category === category)
   } catch (error) {
-    console.error("Error fetching startups by category from Airtable:", error)
-    // Fallback to mock data if there's an error
+    console.error("Error fetching startups by category:", error)
     return mockStartups.filter((s) => s.category === category)
   }
 }
 
 export async function fetchStartupsAnalytics(dateRange?: { start: Date; end: Date }) {
   try {
-    // Fetch all startups first
     const startups = await fetchStartups()
 
     // Filter by date range if provided
@@ -281,38 +259,13 @@ export async function fetchStartupsAnalytics(dateRange?: { start: Date; end: Dat
       totalStartups: filteredStartups.length,
     }
   } catch (error) {
-    console.error("Error fetching startups analytics from Airtable:", error)
-    // Fallback to mock analytics if there's an error
-    return fetchMockAnalytics(dateRange)
+    console.error("Error fetching startups analytics:", error)
+    return fetchMockAnalytics()
   }
-}
-
-// Helper function to apply filters to mock data
-function applyFilters(
-  startups: Startup[],
-  filters?: { category?: string; country?: string; year?: number },
-): Startup[] {
-  if (!filters) return startups
-
-  let result = [...startups]
-
-  if (filters.category && filters.category !== "all") {
-    result = result.filter((s) => s.category === filters.category)
-  }
-
-  if (filters.country && filters.country !== "all") {
-    result = result.filter((s) => s.country === filters.country)
-  }
-
-  if (filters.year && filters.year !== 0) {
-    result = result.filter((s) => s.yearFounded === filters.year)
-  }
-
-  return result
 }
 
 // Helper function to generate mock analytics
-function fetchMockAnalytics(dateRange?: { start: Date; end: Date }) {
+function fetchMockAnalytics() {
   // Filter by date range if provided
   const filteredStartups = [...mockStartups]
 

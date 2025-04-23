@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { fetchStartupsAnalytics } from "@/lib/airtable"
+import { fetchStartupsAnalytics } from "@/lib/startups"
 import { formatCurrency } from "@/lib/utils"
 import {
   BarChart,

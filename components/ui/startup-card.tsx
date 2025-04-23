@@ -1,6 +1,6 @@
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import type { Startup } from "@/lib/airtable"
+import type { Startup } from "@/lib/startups"
 import Image from "next/image"
 import Link from "next/link"
 import { formatCurrency } from "@/lib/utils"
