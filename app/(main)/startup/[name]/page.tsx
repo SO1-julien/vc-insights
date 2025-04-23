@@ -110,11 +110,11 @@ export default async function StartupPage({ params }: { params: { name: string }
               </div>
 
               <div className="mb-4">
-                <p className="text-muted-foreground">{startup.country.name}</p>
+                <p className="text-muted-foreground">{startup.country}</p>
               </div>
 
               <div className="mb-4 flex flex-wrap gap-2">
-                <Badge variant="outline">{startup.category.name}</Badge>
+                <Badge variant="outline">{startup.category}</Badge>
                 {startup.industry.map((ind) => (
                   <Badge key={ind} variant="secondary" className="bg-slate-100">
                     {ind}
@@ -164,7 +164,7 @@ export default async function StartupPage({ params }: { params: { name: string }
         <DynamicCharts
           revenueData={revenueComparisonData}
           employeesData={employeesComparisonData}
-          category={startup.category.name}
+          category={startup.category}
         />
       </div>
 
@@ -212,11 +212,11 @@ export default async function StartupPage({ params }: { params: { name: string }
             <dl className="grid grid-cols-2 gap-4">
               <div>
                 <dt className="text-sm font-medium text-muted-foreground">Funding Stage</dt>
-                <dd>{startup.fundingStage.name}</dd>
+                <dd>{startup.fundingStage}</dd>
               </div>
               <div>
                 <dt className="text-sm font-medium text-muted-foreground">Production Stage</dt>
-                <dd>{startup.productionDevelopmentStage.name}</dd>
+                <dd>{startup.productionDevelopmentStage}</dd>
               </div>
               <div>
                 <dt className="text-sm font-medium text-muted-foreground">Target Market</dt>
@@ -232,7 +232,7 @@ export default async function StartupPage({ params }: { params: { name: string }
               </div>
               <div>
                 <dt className="text-sm font-medium text-muted-foreground">Country</dt>
-                <dd>{startup.country.name}</dd>
+                <dd>{startup.country}</dd>
               </div>
             </dl>
           </CardContent>

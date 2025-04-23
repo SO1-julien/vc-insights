@@ -2,9 +2,9 @@
 export type Startup = {
   id: string
   name: string
-  country: { id: string; name: string }
-  category: { id: string; name: string }
-  industry: Array<string>
+  country: string
+  category: string
+  industry: string
   description: string
   revenue: number
   fundraising: number
@@ -12,10 +12,10 @@ export type Startup = {
   employees: number
   analysisRating: number
   analysisContent: string
-  fundingStage: { id: string; name: string }
-  productionDevelopmentStage: { id: string; name: string }
-  targetMarket: Array<string>
-  customers: string
+  fundingStage: string
+  productionDevelopmentStage: string
+  targetMarket: string[]
+  customers: string[]
   ARR: number
   grossMargin: number
   logo: string
@@ -46,11 +46,11 @@ export async function fetchStartups(filters?: {
     let result = [...startups]
 
     if (filters.category && filters.category !== "all") {
-      result = result.filter((s) => s.category.name === filters.category)
+      result = result.filter((s) => s.category === filters.category)
     }
 
     if (filters.country && filters.country !== "all") {
-      result = result.filter((s) => s.country.name === filters.country)
+      result = result.filter((s) => s.country === filters.country)
     }
 
     if (filters.year && filters.year !== 0) {
@@ -67,7 +67,7 @@ export async function fetchStartups(filters?: {
 // Function to fetch a startup by name
 export async function fetchStartupByName(name: string): Promise<Startup | null> {
   try {
-    const response = await fetch(`/api/airtable/startups/${encodeURIComponent(name)}`)
+    const response = await fetch(`/api/airtable/startups?name=${encodeURIComponent(name)}`)
 
     if (!response.ok) {
       if (response.status === 404) {
@@ -84,9 +84,9 @@ export async function fetchStartupByName(name: string): Promise<Startup | null> 
 }
 
 // Function to fetch startups by category
-export async function fetchStartupsByCategory(category: { id: string; name: string }): Promise<Startup[]> {
+export async function fetchStartupsByCategory(category: string): Promise<Startup[]> {
   try {
-    const response = await fetch(`/api/airtable/startups/category/${encodeURIComponent(category.name)}`)
+    const response = await fetch(`/api/airtable/startups?category=${encodeURIComponent(category)}`)
 
     if (!response.ok) {
       throw new Error(`Failed to fetch startups by category: ${response.statusText}`)
@@ -117,7 +117,7 @@ export async function fetchStartupsAnalytics(dateRange?: { start: Date; end: Dat
     // Group by funding stage
     const byFundingStage = filteredStartups.reduce(
       (acc, startup) => {
-        const stageName = startup.fundingStage.name
+        const stageName = startup.fundingStage
         acc[stageName] = (acc[stageName] || 0) + 1
         return acc
       },
@@ -127,7 +127,7 @@ export async function fetchStartupsAnalytics(dateRange?: { start: Date; end: Dat
     // Group by category
     const byCategory = filteredStartups.reduce(
       (acc, startup) => {
-        const categoryName = startup.category.name
+        const categoryName = startup.category
         if (!acc[categoryName]) {
           acc[categoryName] = {
             count: 0,

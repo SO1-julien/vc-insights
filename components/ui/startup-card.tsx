@@ -25,14 +25,10 @@ export function StartupCard({ startup }: StartupCardProps) {
             </div>
             <div className="flex-1">
               <h3 className="text-xl font-semibold">{startup.name}</h3>
-              <p className="text-sm text-muted-foreground">{startup.country.name}</p>
+              <p className="text-sm text-muted-foreground">{startup.country}</p>
               <div className="mt-2 flex flex-wrap gap-1">
-                <Badge variant="outline">{startup.category.name}</Badge>
-                {startup.industry.slice(0, 2).map((ind) => (
-                  <Badge key={ind} variant="secondary" className="bg-slate-100">
-                    {ind}
-                  </Badge>
-                ))}
+                <Badge variant="outline">{startup.category}</Badge>
+                <Badge variant="outline">{startup.industry}</Badge>
               </div>
             </div>
           </div>

@@ -96,7 +96,7 @@ export interface Database {
           targetMarket?: string
           customers?: string
           ARR?: number
-          grossMargin?: string
+          grossMargin?: number
           logo?: string
           url?: string
           updated_at?: string
