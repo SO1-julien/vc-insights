@@ -5,7 +5,7 @@ import { verifyToken } from "./auth"
  * Server-side function to get the current user from the request
  */
 export async function getCurrentUser() {
-  const cookieStore = cookies()
+  const cookieStore = await cookies()
   const token = cookieStore.get("auth-token")?.value
 
   if (!token) {

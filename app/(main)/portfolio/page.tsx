@@ -1,17 +1,17 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { fetchStartups, type Startup } from "@/lib/startups"
+import type { Startup } from "@/lib/startups"
 import { StartupCard } from "@/components/ui/startup-card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
 import { X, Filter } from "lucide-react"
 import { toast } from "@/components/ui/use-toast"
+import { useStartups } from "@/lib/startup-context"
 
 export default function PortfolioPage() {
-  const [startups, setStartups] = useState<Startup[]>([])
+  const { startups, loading, error } = useStartups()
   const [filteredStartups, setFilteredStartups] = useState<Startup[]>([])
-  const [loading, setLoading] = useState(true)
   const [filters, setFilters] = useState({
     category: "",
     country: "",
@@ -24,26 +24,14 @@ export default function PortfolioPage() {
   const years = [...new Set(startups.map((s) => s.yearFounded))].sort((a, b) => b - a)
 
   useEffect(() => {
-    const loadStartups = async () => {
-      try {
-        setLoading(true)
-        const data = await fetchStartups()
-        setStartups(data)
-        setFilteredStartups(data)
-      } catch (error) {
-        console.error("Error loading startups:", error)
-        toast({
-          title: "Error loading startups",
-          description: "Failed to load startup data. Please try again later.",
-          variant: "destructive",
-        })
-      } finally {
-        setLoading(false)
-      }
+    if (error) {
+      toast({
+        title: "Error loading startups",
+        description: "Failed to load startup data. Please try again later.",
+        variant: "destructive",
+      })
     }
-
-    loadStartups()
-  }, [])
+  }, [error])
 
   useEffect(() => {
     let result = [...startups]

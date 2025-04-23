@@ -1,5 +1,8 @@
-import { fetchStartupByName, fetchStartupsByCategory } from "@/lib/startups"
-import { notFound } from "next/navigation"
+"use client"
+
+import { useEffect, useState } from "react"
+import { useParams, notFound, useRouter } from "next/navigation"
+import { fetchStartupByName } from "@/lib/startups"
 import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -7,39 +10,109 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { formatCurrency } from "@/lib/utils"
 import Link from "next/link"
 import DynamicCharts from "@/components/startup/dynamic-charts"
+import { useStartups } from "@/lib/startup-context"
+import { Skeleton } from "@/components/ui/skeleton"
 
-export default async function StartupPage({ params }: { params: { name: string } }) {
-  const decodedName = decodeURIComponent(params.name)
-  const startup = await fetchStartupByName(decodedName)
+export default function StartupPage() {
+  const params = useParams()
+  const router = useRouter()
+  const { startups, loading: startupsLoading } = useStartups()
+  const [startup, setStartup] = useState(null)
+  const [sameCategory, setSameCategory] = useState([])
+  const [loading, setLoading] = useState(true)
 
-  if (!startup) {
-    notFound()
+  useEffect(() => {
+    const loadStartup = async () => {
+      if (!params?.name) {
+        router.push("/portfolio")
+        return
+      }
+
+      const decodedName = decodeURIComponent(params.name as string)
+
+      // First, try to find the startup in the context
+      if (startups.length > 0) {
+        const foundStartup = startups.find((s) => s.name === decodedName)
+        if (foundStartup) {
+          setStartup(foundStartup)
+
+          // Find startups in the same category
+          const sameCategoryStartups = startups.filter(
+            (s) => s.category === foundStartup.category && s.id !== foundStartup.id,
+          )
+          setSameCategory(sameCategoryStartups)
+          setLoading(false)
+          return
+        }
+      }
+
+      // If not found in context or context is empty, fetch from API
+      try {
+        const startupData = await fetchStartupByName(decodedName)
+        if (!startupData) {
+          notFound()
+          return
+        }
+
+        setStartup(startupData)
+
+        // If we had to fetch the startup, we also need to fetch related startups
+        const categoryStartups = await fetchStartupsByCategory(startupData.category)
+        setSameCategory(categoryStartups.filter((s) => s.id !== startupData.id))
+      } catch (error) {
+        console.error("Error loading startup:", error)
+        notFound()
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    if (!startupsLoading) {
+      loadStartup()
+    }
+  }, [params, startups, startupsLoading, router])
+
+  if (loading || !startup) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="mb-8">
+          <Skeleton className="h-9 w-32" />
+        </div>
+        <Card className="mb-8">
+          <CardContent className="p-6">
+            <div className="flex flex-col gap-6 md:flex-row">
+              <Skeleton className="h-24 w-24 flex-shrink-0 rounded-md" />
+              <div className="flex-1">
+                <Skeleton className="mb-2 h-10 w-48" />
+                <Skeleton className="mb-4 h-5 w-32" />
+                <div className="mb-4 flex flex-wrap gap-2">
+                  <Skeleton className="h-6 w-20" />
+                  <Skeleton className="h-6 w-20" />
+                </div>
+                <Skeleton className="h-20 w-full" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )
   }
 
-  // Fetch comparison data
-  const sameCategory = await fetchStartupsByCategory(startup.category)
-
   // Prepare comparison data for charts
-  const revenueComparisonData = sameCategory
-    .filter((s) => s.id !== startup.id)
-    .slice(0, 5)
-    .map((s) => ({
-      name: s.name,
-      revenue: s.revenue,
-    }))
+  const revenueComparisonData = sameCategory.slice(0, 5).map((s) => ({
+    name: s.name,
+    revenue: s.revenue,
+  }))
 
   revenueComparisonData.unshift({
     name: startup.name,
     revenue: startup.revenue,
   })
 
-  const employeesComparisonData = sameCategory
-    .filter((s) => s.id !== startup.id)
-    .slice(0, 5)
-    .map((s) => ({
-      name: s.name,
-      employees: s.employees,
-    }))
+  const employeesComparisonData = sameCategory.slice(0, 5).map((s) => ({
+    name: s.name,
+    employees: s.employees,
+  }))
 
   employeesComparisonData.unshift({
     name: startup.name,
@@ -115,11 +188,9 @@ export default async function StartupPage({ params }: { params: { name: string }
 
               <div className="mb-4 flex flex-wrap gap-2">
                 <Badge variant="outline">{startup.category}</Badge>
-                {startup.industry.map((ind) => (
-                  <Badge key={ind} variant="secondary" className="bg-slate-100">
-                    {ind}
-                  </Badge>
-                ))}
+                <Badge variant="secondary" className="bg-slate-100">
+                  {startup.industry}
+                </Badge>
               </div>
 
               <p className="text-muted-foreground">{startup.description}</p>
@@ -224,11 +295,11 @@ export default async function StartupPage({ params }: { params: { name: string }
               </div>
               <div>
                 <dt className="text-sm font-medium text-muted-foreground">Customers</dt>
-                <dd>{startup.customers}</dd>
+                <dd>{Array.isArray(startup.customers) ? startup.customers.join(", ") : startup.customers}</dd>
               </div>
               <div>
-                <dt className="text-sm font-medium text-muted-foreground">Industries</dt>
-                <dd>{startup.industry.join(", ")}</dd>
+                <dt className="text-sm font-medium text-muted-foreground">Industry</dt>
+                <dd>{startup.industry}</dd>
               </div>
               <div>
                 <dt className="text-sm font-medium text-muted-foreground">Country</dt>
@@ -268,4 +339,18 @@ export default async function StartupPage({ params }: { params: { name: string }
       </div>
     </div>
   )
+}
+
+// We need to add this function to make sure the fetchStartupsByCategory is available
+async function fetchStartupsByCategory(category: string) {
+  try {
+    const response = await fetch(`/api/airtable/startups?category=${encodeURIComponent(category)}`)
+    if (!response.ok) {
+      throw new Error(`Failed to fetch startups by category: ${response.statusText}`)
+    }
+    return await response.json()
+  } catch (error) {
+    console.error("Error fetching startups by category:", error)
+    return []
+  }
 }
