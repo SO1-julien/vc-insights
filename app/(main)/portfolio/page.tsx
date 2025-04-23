@@ -19,8 +19,8 @@ export default function PortfolioPage() {
   })
 
   // Get unique values for filter options
-  const categories = [...new Set(startups.map((s) => s.category))]
-  const countries = [...new Set(startups.map((s) => s.country))]
+  const categories = [...new Set(startups.map((s) => s.category.name))]
+  const countries = [...new Set(startups.map((s) => s.country.name))]
   const years = [...new Set(startups.map((s) => s.yearFounded))].sort((a, b) => b - a)
 
   useEffect(() => {
@@ -49,11 +49,11 @@ export default function PortfolioPage() {
     let result = [...startups]
 
     if (filters.category && filters.category !== "all") {
-      result = result.filter((s) => s.category === filters.category)
+      result = result.filter((s) => s.category.name === filters.category)
     }
 
     if (filters.country && filters.country !== "all") {
-      result = result.filter((s) => s.country === filters.country)
+      result = result.filter((s) => s.country.name === filters.country)
     }
 
     if (filters.year && filters.year !== "all") {

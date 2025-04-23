@@ -2,9 +2,9 @@
 export type Startup = {
   id: string
   name: string
-  country: string
-  category: string
-  industry: string[]
+  country: { id: string; name: string }
+  category: { id: string; name: string }
+  industry: Array<string>
   description: string
   revenue: number
   fundraising: number
@@ -12,9 +12,9 @@ export type Startup = {
   employees: number
   analysisRating: number
   analysisContent: string
-  fundingStage: string
-  productionDevelopmentStage: string
-  targetMarket: string
+  fundingStage: { id: string; name: string }
+  productionDevelopmentStage: { id: string; name: string }
+  targetMarket: Array<string>
   customers: string
   ARR: number
   grossMargin: number
@@ -46,11 +46,11 @@ export async function fetchStartups(filters?: {
     let result = [...startups]
 
     if (filters.category && filters.category !== "all") {
-      result = result.filter((s) => s.category === filters.category)
+      result = result.filter((s) => s.category.name === filters.category)
     }
 
     if (filters.country && filters.country !== "all") {
-      result = result.filter((s) => s.country === filters.country)
+      result = result.filter((s) => s.country.name === filters.country)
     }
 
     if (filters.year && filters.year !== 0) {
@@ -84,9 +84,9 @@ export async function fetchStartupByName(name: string): Promise<Startup | null> 
 }
 
 // Function to fetch startups by category
-export async function fetchStartupsByCategory(category: string): Promise<Startup[]> {
+export async function fetchStartupsByCategory(category: { id: string; name: string }): Promise<Startup[]> {
   try {
-    const response = await fetch(`/api/airtable/startups/category/${encodeURIComponent(category)}`)
+    const response = await fetch(`/api/airtable/startups/category/${encodeURIComponent(category.name)}`)
 
     if (!response.ok) {
       throw new Error(`Failed to fetch startups by category: ${response.statusText}`)
@@ -117,7 +117,8 @@ export async function fetchStartupsAnalytics(dateRange?: { start: Date; end: Dat
     // Group by funding stage
     const byFundingStage = filteredStartups.reduce(
       (acc, startup) => {
-        acc[startup.fundingStage] = (acc[startup.fundingStage] || 0) + 1
+        const stageName = startup.fundingStage.name
+        acc[stageName] = (acc[stageName] || 0) + 1
         return acc
       },
       {} as Record<string, number>,
@@ -126,8 +127,9 @@ export async function fetchStartupsAnalytics(dateRange?: { start: Date; end: Dat
     // Group by category
     const byCategory = filteredStartups.reduce(
       (acc, startup) => {
-        if (!acc[startup.category]) {
-          acc[startup.category] = {
+        const categoryName = startup.category.name
+        if (!acc[categoryName]) {
+          acc[categoryName] = {
             count: 0,
             totalRevenue: 0,
             totalEmployees: 0,
@@ -136,11 +138,11 @@ export async function fetchStartupsAnalytics(dateRange?: { start: Date; end: Dat
           }
         }
 
-        acc[startup.category].count += 1
-        acc[startup.category].totalRevenue += startup.revenue
-        acc[startup.category].totalEmployees += startup.employees
-        acc[startup.category].totalARR += startup.ARR
-        acc[startup.category].totalGrossMargin += startup.grossMargin
+        acc[categoryName].count += 1
+        acc[categoryName].totalRevenue += startup.revenue
+        acc[categoryName].totalEmployees += startup.employees
+        acc[categoryName].totalARR += startup.ARR
+        acc[categoryName].totalGrossMargin += startup.grossMargin
 
         return acc
       },

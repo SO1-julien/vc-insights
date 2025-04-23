@@ -110,11 +110,11 @@ export default async function StartupPage({ params }: { params: { name: string }
               </div>
 
               <div className="mb-4">
-                <p className="text-muted-foreground">{startup.country}</p>
+                <p className="text-muted-foreground">{startup.country.name}</p>
               </div>
 
               <div className="mb-4 flex flex-wrap gap-2">
-                <Badge variant="outline">{startup.category}</Badge>
+                <Badge variant="outline">{startup.category.name}</Badge>
                 {startup.industry.map((ind) => (
                   <Badge key={ind} variant="secondary" className="bg-slate-100">
                     {ind}
@@ -164,7 +164,7 @@ export default async function StartupPage({ params }: { params: { name: string }
         <DynamicCharts
           revenueData={revenueComparisonData}
           employeesData={employeesComparisonData}
-          category={startup.category}
+          category={startup.category.name}
         />
       </div>
 
@@ -212,15 +212,15 @@ export default async function StartupPage({ params }: { params: { name: string }
             <dl className="grid grid-cols-2 gap-4">
               <div>
                 <dt className="text-sm font-medium text-muted-foreground">Funding Stage</dt>
-                <dd>{startup.fundingStage}</dd>
+                <dd>{startup.fundingStage.name}</dd>
               </div>
               <div>
                 <dt className="text-sm font-medium text-muted-foreground">Production Stage</dt>
-                <dd>{startup.productionDevelopmentStage}</dd>
+                <dd>{startup.productionDevelopmentStage.name}</dd>
               </div>
               <div>
                 <dt className="text-sm font-medium text-muted-foreground">Target Market</dt>
-                <dd>{startup.targetMarket}</dd>
+                <dd>{Array.isArray(startup.targetMarket) ? startup.targetMarket.join(", ") : startup.targetMarket}</dd>
               </div>
               <div>
                 <dt className="text-sm font-medium text-muted-foreground">Customers</dt>
@@ -232,7 +232,7 @@ export default async function StartupPage({ params }: { params: { name: string }
               </div>
               <div>
                 <dt className="text-sm font-medium text-muted-foreground">Country</dt>
-                <dd>{startup.country}</dd>
+                <dd>{startup.country.name}</dd>
               </div>
             </dl>
           </CardContent>
